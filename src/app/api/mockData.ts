@@ -217,6 +217,7 @@ export let mockDocuments: FleetDocument[] = [
     ownerId: 1,
     documentType: "COMMERCIAL_REGISTRATION",
     fileName: "isuzu_commercial_registration_2026.pdf",
+    url: "https://example.com/docs/isuzu_commercial_registration_2026.pdf",
     expiryDate: "2027-04-30",
     uploadedAt: "2026-01-15T10:00:00",
   },
@@ -226,6 +227,7 @@ export let mockDocuments: FleetDocument[] = [
     ownerId: 2,
     documentType: "INSURANCE_POLICY",
     fileName: "scania_comprehensive_freight_insurance.pdf",
+    url: "https://example.com/docs/scania_comprehensive_freight_insurance.pdf",
     expiryDate: "2026-10-15",
     uploadedAt: "2025-10-15T09:30:00",
   },
@@ -235,6 +237,7 @@ export let mockDocuments: FleetDocument[] = [
     ownerId: 1,
     documentType: "DRIVING_LICENSE",
     fileName: "abebe_heavy_freight_license.pdf",
+    url: "https://example.com/docs/abebe_heavy_freight_license.pdf",
     expiryDate: "2027-05-15",
     uploadedAt: "2025-05-15T11:00:00",
   },
@@ -484,6 +487,7 @@ export function handleMockRequest(path: string, options: { method?: string; body
         ownerId: 1,
         documentType: "COMPLIANCE_CERTIFICATE",
         fileName: "uploaded_compliance_doc.pdf",
+        url: "https://example.com/docs/uploaded_compliance_doc.pdf",
         expiryDate: "2027-12-31",
         uploadedAt: new Date().toISOString(),
       };
@@ -491,6 +495,23 @@ export function handleMockRequest(path: string, options: { method?: string; body
       return newDoc;
     }
     return [...mockDocuments];
+  }
+
+  // Monitoring Overview
+  if (path === "/api/v1/monitoring/overview") {
+    return {
+      fleetSize: mockVehicles.length,
+      activeTrips: mockTrips.filter(
+        (t) =>
+          t.status === TripStatus.IN_TRANSIT ||
+          t.status === TripStatus.ASSIGNED ||
+          t.status === TripStatus.LOADING,
+      ).length,
+      vehiclesInTransit: mockVehicles.filter((v) => v.status === VehicleStatus.IN_TRANSIT).length,
+      vehiclesInMaintenance: mockVehicles.filter((v) => v.status === VehicleStatus.MAINTENANCE).length,
+      openFraudAlerts: mockFraudAlerts.filter((a) => a.status === "OPEN").length,
+      updatedAt: new Date().toISOString(),
+    };
   }
 
   return {};

@@ -73,7 +73,9 @@ export default function TripDetailPage() {
   const [busy, setBusy] = useState(false);
 
   const current = trip.data;
-  const stepIndex = current ? STEP_INDEX[current.status] : -1;
+  const stepIndex = current ? STEP_INDEX[current.status] ?? -1 : -1;
+  const legalNextTransitions = (current ? TRIP_TRANSITIONS[current.status] : undefined) ?? [];
+  const canCancel = legalNextTransitions.includes(TripStatus.CANCELLED);
 
   const assignedVehicle = vehicles.data?.find((v) => v.id === current?.vehicleId);
   const assignedDriver = drivers.data?.find((d) => d.id === current?.driverId);
@@ -173,7 +175,7 @@ export default function TripDetailPage() {
                       Assign Resource
                     </Button>
                   )}
-                  {TRIP_TRANSITIONS[current.status].includes(TripStatus.CANCELLED) && (
+                  {canCancel && (
                     <Button
                       variant="outlined"
                       color="error"
@@ -212,12 +214,12 @@ export default function TripDetailPage() {
                 </Alert>
               )}
 
-              {TRIP_TRANSITIONS[current.status].length > 0 && (
+              {legalNextTransitions.length > 0 && (
                 <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: 3, pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
                   <Typography variant="body2" fontWeight={600} sx={{ mr: 1 }}>
                     Next Dispatch Step:
                   </Typography>
-                  {TRIP_TRANSITIONS[current.status]
+                  {legalNextTransitions
                     .filter((target) => target !== TripStatus.CANCELLED)
                     .map((target) => (
                       <Button

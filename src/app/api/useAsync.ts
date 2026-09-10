@@ -46,6 +46,6 @@ export function useAsync<T>(
     data,
     loading,
     error,
-    refetch: () => setNonce(nonce + 1),
+    refetch: () => setNonce((n) => n + 1),
   };
 }
