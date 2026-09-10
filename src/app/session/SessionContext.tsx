@@ -19,12 +19,8 @@ interface SessionContextValue {
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(() => getSession());
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setSession(getSession());
-  }, []);
 
   // Route any global 401 straight back to login.
   useEffect(() => {

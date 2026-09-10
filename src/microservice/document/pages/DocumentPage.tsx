@@ -177,11 +177,14 @@ export default function DocumentPage() {
                     <Button
                       size="small"
                       startIcon={<DownloadIcon />}
-                      onClick={() => {
-                        alert(`Viewing file: ${d.fileName}`);
-                      }}
+                      component="a"
+                      href={d.url ?? "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={d.fileName}
+                      disabled={!d.url}
                     >
-                      Download
+                      {d.url ? "Download" : "Pending"}
                     </Button>
                   </TableCell>
                 </TableRow>

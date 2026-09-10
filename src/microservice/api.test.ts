@@ -6,6 +6,8 @@ import { createDriver, updateDriverStatus } from "./driver/api";
 import { reviewFraudAlert } from "./fraud/api";
 import { recordFuelTransaction } from "./fuel/api";
 import { recordMaintenance } from "./maintenance/api";
+import { getMonitoringOverview } from "./monitoring/api";
+import { handleMockRequest } from "../app/api/mockData";
 
 function mockJsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify({ success: true, data, timestamp: "2026-09-09T12:00:00" }), {
@@ -219,6 +221,44 @@ describe("Microservice API clients", () => {
       expect(url).toBe("/api/v1/maintenance/records");
       expect(init.method).toBe("POST");
       expect(JSON.parse(init.body as string).description).toBe("Oil filter change and brake pad check");
+    });
+  });
+
+  describe("Monitoring API & Mock Telemetry", () => {
+    it("getMonitoringOverview sends GET to /api/v1/monitoring/overview", async () => {
+      const fetchMock = vi.fn().mockResolvedValue(
+        mockJsonResponse({
+          fleetSize: 15,
+          activeTrips: 5,
+          vehiclesInTransit: 4,
+          vehiclesInMaintenance: 2,
+          openFraudAlerts: 1,
+          updatedAt: "2026-09-10T10:00:00Z",
+        })
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      const overview = await getMonitoringOverview();
+      expect(overview.fleetSize).toBe(15);
+      expect(overview.openFraudAlerts).toBe(1);
+      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe("/api/v1/monitoring/overview");
+      expect(init.method).toBe("GET");
+    });
+
+    it("handleMockRequest returns dynamic monitoring telemetry in demo mode", () => {
+      const mockResult = handleMockRequest("/api/v1/monitoring/overview") as {
+        fleetSize: number;
+        activeTrips: number;
+        vehiclesInTransit: number;
+        vehiclesInMaintenance: number;
+        openFraudAlerts: number;
+        updatedAt: string;
+      };
+      expect(typeof mockResult.fleetSize).toBe("number");
+      expect(mockResult.fleetSize).toBeGreaterThan(0);
+      expect(typeof mockResult.updatedAt).toBe("string");
+      expect(new Date(mockResult.updatedAt).getTime()).not.toBeNaN();
     });
   });
 });
